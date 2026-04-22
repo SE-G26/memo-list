@@ -12,10 +12,9 @@ export function LearningConfirm({ open, onClose, onConfirm }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
-        <h3 className="text-lg font-semibold mb-3">For learning purpose</h3>
+        <h3 className="text-lg font-semibold mb-3">学习任务</h3>
         <p className="text-gray-600 mb-6">
-          By selecting &quot;For learning purpose&quot;, we will arrange review tasks for you
-          automatically.
+          开启「学习任务」后，系统将自动为你安排复习任务。
         </p>
         <button
           onClick={() => {
@@ -24,7 +23,7 @@ export function LearningConfirm({ open, onClose, onConfirm }: Props) {
           }}
           className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium"
         >
-          OK
+          知道了
         </button>
       </div>
     </div>

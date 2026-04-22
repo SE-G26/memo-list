@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Task } from '@/shared/types/global';
 import {
   loadTasks,
@@ -10,7 +10,13 @@ import {
 type TaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed'>;
 
 export function useTasks(initialDate?: string) {
-  const [tasks, setTasks] = useState<Task[]>(() => loadTasks());
+  const [tasks, setTasks] = useState<Task[]>([]);
+  
+  useEffect(() => {
+    setTasks(loadTasks());
+  }, []);
+
+  //const [tasks, setTasks] = useState<Task[]>(() => loadTasks());
   const [selectedDate, setSelectedDate] = useState(
     initialDate || new Date().toISOString().split('T')[0]
   );

@@ -14,17 +14,17 @@ export function DeleteConfirm({ open, onClose, onConfirm }: Props) {
       <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-2xl">⚠️</span>
-          <h3 className="text-lg font-semibold">You are deleting your task!</h3>
+          <h3 className="text-lg font-semibold">正在删除任务！</h3>
         </div>
         <p className="text-gray-600 mb-6">
-          Your task and relevant progress will lose forever!
+          任务及相关进度将被永久删除！
         </p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 py-3 border rounded-lg font-medium"
           >
-            Maybe later
+            再想想
           </button>
           <button
             onClick={() => {
@@ -33,7 +33,7 @@ export function DeleteConfirm({ open, onClose, onConfirm }: Props) {
             }}
             className="flex-1 py-3 bg-red-600 text-white rounded-lg font-medium"
           >
-            Delete now
+            确认删除
           </button>
         </div>
       </div>
