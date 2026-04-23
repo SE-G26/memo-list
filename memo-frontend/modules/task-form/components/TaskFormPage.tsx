@@ -46,7 +46,7 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) {
       alert('请填写任务标题');
       return;
@@ -54,18 +54,30 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
 
     const submitData = getSubmitData();
 
-    if (isEdit) {
-      updateTask(task.id, submitData);
-    } else {
-      addTask(submitData);
-    }
+    try {
+      if (isEdit) {
+        await updateTask(task.id, submitData);
+      } else {
+        await addTask(submitData);
+      }
 
-    router.push(`/?date=${formData.dueDate}`);
+      router.push(`/?date=${formData.dueDate}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '保存失败，请稍后重试';
+      alert(message);
+    }
+    
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (isEdit) {
-      deleteTask(task.id);
+      try {
+        await deleteTask(task.id);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '删除失败，请稍后重试';
+        alert(message);
+        return;
+      }
     }
     router.push(`/?date=${formData.dueDate}`);
   };

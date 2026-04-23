@@ -1,11 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
-import type { Task } from '@/shared/types/global';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import type { MasteryLevel, Task } from '@/shared/types/global';
 import {
-  loadTasks,
-  addTaskToStorage,
-  updateTaskInStorage,
-  deleteTaskFromStorage,
-} from '@/shared/lib/storage';
+  completeTask,
+  createTask,
+  fetchTasks,
+  patchTask,
+  removeTask,
+} from '@/shared/lib/task-api';
 
 type TaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed'>;
 
@@ -21,52 +22,82 @@ export function useTasks(initialDate?: string) {
     initialDate || new Date().toISOString().split('T')[0]
   );
 
-  // 按日期过滤
-  const filteredTasks = tasks.filter((task) => task.dueDate === selectedDate);
-
-  // 生成 ID
-  const generateId = () => `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-  // 添加任务
-  const addTask = useCallback((taskData: TaskInput) => {
-    const now = new Date().toISOString();
-    const newTask: Task = {
-      ...taskData,
-      id: generateId(),
-      completed: false,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const newTasks = addTaskToStorage(newTask);
-    setTasks(newTasks);
-    return newTask;
+  const refreshTasks = useCallback(async () => {
+    const latestTasks = await fetchTasks();
+    setTasks(latestTasks);
   }, []);
 
-  // 更新任务
-  const updateTask = useCallback((id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => {
-    const fullUpdates = { ...updates, updatedAt: new Date().toISOString() };
-    const newTasks = updateTaskInStorage(id, fullUpdates);
-    setTasks(newTasks);
-  }, []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refreshTasks();
+  }, [refreshTasks]);
 
-  // 删除任务
-  const deleteTask = useCallback((id: string) => {
-    const newTasks = deleteTaskFromStorage(id);
-    setTasks(newTasks);
-  }, []);
+  const filteredTasks = useMemo(
+    () => tasks.filter((task) => task.dueDate === selectedDate),
+    [tasks, selectedDate]
+  );
 
-  // 切换完成状态
-  const toggleComplete = useCallback((id: string) => {
-    const task = tasks.find(t => t.id === id);
+  const addTask = useCallback(async (taskData: TaskInput) => {
+    const task = await createTask(taskData);
+    await refreshTasks();
+    return task;
+  }, [refreshTasks]);
+
+  const updateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => {
+    await patchTask(id, updates);
+    await refreshTasks();
+  }, [refreshTasks]);
+
+  const deleteTask = useCallback(async (id: string) => {
+    await removeTask(id);
+    await refreshTasks();
+  }, [refreshTasks]);
+
+  const toggleComplete = useCallback(async (id: string) => {
+    const task = tasks.find((t) => t.id === id);
     if (!task) return;
 
-    const newTasks = updateTaskInStorage(id, {
-      completed: !task.completed,
-      updatedAt: new Date().toISOString(),
-    });
-    setTasks(newTasks);
-  }, [tasks]);
+    if (task.completed) {
+      alert('已完成任务暂不支持取消勾选。');
+      return;
+    }
+
+    if (task.isLearning) {
+      const taskKind = task.taskKind || 'learning_source';
+
+      if (taskKind === 'learning_review') {
+        const input = window.prompt('请评估掌握度（good / okay / poor）', 'okay');
+        if (!input) return;
+
+        const normalized = input.trim().toLowerCase();
+        const masteryMap: Record<string, MasteryLevel> = {
+          good: 'good',
+          okay: 'fair',
+          fair: 'fair',
+          poor: 'poor',
+        };
+        const mastery = masteryMap[normalized];
+
+        if (!mastery) {
+          alert('请输入 good、okay 或 poor。');
+          return;
+        }
+
+        await completeTask(id, { mastery });
+      } else {
+        const learnedContent = window.prompt('请输入本次学习内容');
+        if (!learnedContent || !learnedContent.trim()) {
+          alert('学习任务完成时需要填写学习内容。');
+          return;
+        }
+        await completeTask(id, { learnedContent: learnedContent.trim() });
+      }
+    } else {
+      await completeTask(id, {});
+    }
+
+    await refreshTasks();
+  }, [refreshTasks, tasks]);
 
   return {
     tasks: filteredTasks,
@@ -77,5 +108,6 @@ export function useTasks(initialDate?: string) {
     updateTask,
     deleteTask,
     toggleComplete,
+    refreshTasks,
   };
 }
