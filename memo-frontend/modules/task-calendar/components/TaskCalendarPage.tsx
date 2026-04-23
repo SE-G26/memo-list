@@ -125,9 +125,18 @@ export function TaskCalendarPage() {
     <div className="container mx-auto max-w-4xl px-4 py-6">
       <div className="mb-6 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50 p-5">
         <div className="mb-4 flex items-center justify-between">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
-            返回任务列表
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
+              返回任务列表
+            </Link>
+            <span className="text-gray-300">|</span>
+            <Link 
+              href={`/?date=${selectedDate}`} 
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              查看当天任务
+            </Link>
+          </div>
           <Link
             href={`/task/new?date=${selectedDate}`}
             className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"

@@ -61,11 +61,12 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
         await addTask(submitData);
       }
 
-      router.push('/');
+      router.push(`/?date=${formData.dueDate}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : '保存失败，请稍后重试';
       alert(message);
     }
+    
   };
 
   const handleDelete = async () => {
@@ -78,7 +79,7 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
         return;
       }
     }
-    router.push('/');
+    router.push(`/?date=${formData.dueDate}`);
   };
 
   return (
@@ -87,7 +88,9 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
         <div className="container mx-auto max-w-2xl px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="p-2 -ml-2 text-gray-600 hover:text-gray-900">
+            <Link href={`/?date=${formData.dueDate}`}
+             className="p-2 -ml-2 text-gray-600 hover:text-gray-900"
+            >
               <ChevronLeft className="h-5 w-5" />
             </Link>
             {/*<h1 className="text-lg font-semibold text-gray-900">
