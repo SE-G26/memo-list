@@ -39,7 +39,6 @@ export function DeleteConfirm({ open, onClose, onConfirm }: Props) {
           </button>
           <button
             onClick={handleConfirm}
-            disabled={deleting}
             className="flex-1 py-3 bg-red-600 text-white rounded-lg font-medium"
           >
             确认删除
