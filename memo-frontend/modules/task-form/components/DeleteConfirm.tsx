@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -7,6 +9,15 @@ interface Props {
 }
 
 export function DeleteConfirm({ open, onClose, onConfirm }: Props) {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleConfirm = () => {
+    if (deleting) return;
+    setDeleting(true);
+    onConfirm();
+    onClose();
+  };
+
   if (!open) return null;
 
   return (
@@ -27,10 +38,8 @@ export function DeleteConfirm({ open, onClose, onConfirm }: Props) {
             再想想
           </button>
           <button
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
+            onClick={handleConfirm}
+            disabled={deleting}
             className="flex-1 py-3 bg-red-600 text-white rounded-lg font-medium"
           >
             确认删除

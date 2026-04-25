@@ -30,6 +30,8 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
   const [showLearningConfirm, setShowLearningConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const [submitting, setSubmitting] = useState(false);
+
   const frequencyLabels: Record<string, string> = {
     once: '不重复',
     daily: '每日',
@@ -47,10 +49,14 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
+
     if (!validate()) {
       alert('请填写任务标题');
       return;
     }
+
+    setSubmitting(true);
 
     const submitData = getSubmitData();
 
@@ -61,7 +67,7 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
         await addTask(submitData);
       }
 
-      router.push(`/?date=${formData.dueDate}`);
+      router.replace(`/?date=${formData.dueDate}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : '保存失败，请稍后重试';
       alert(message);
@@ -79,7 +85,7 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
         return;
       }
     }
-    router.push(`/?date=${formData.dueDate}`);
+    router.replace(`/?date=${formData.dueDate}`);
   };
 
   return (
