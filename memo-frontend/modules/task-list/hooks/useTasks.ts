@@ -47,7 +47,7 @@ export function useTasks(initialDate?: string) {
     await refreshTasks();
   }, [refreshTasks]);
 
-  // 可删
+  /*
   const toggleComplete = useCallback(async (id: string) => {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
@@ -92,7 +92,7 @@ export function useTasks(initialDate?: string) {
     }
 
     await refreshTasks();
-  }, [refreshTasks, tasks]);
+  }, [refreshTasks, tasks]);*/
 
   const handleCompleteTask = useCallback(async (
     id: string,

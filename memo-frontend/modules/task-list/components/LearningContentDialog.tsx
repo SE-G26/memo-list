@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen } from 'lucide-react';
 
 interface Props {
@@ -14,20 +14,29 @@ export function LearningContentDialog({ open, onClose, onConfirm, taskTitle }: P
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
 
+  const [submitting, setSubmitting] = useState(false);
+  useEffect(() => {
+    if (open) setSubmitting(false);
+  }, [open]);
+
   if (!open) return null;
 
   const handleConfirm = () => {  
+    if (submitting) return;
+
     if (!content.trim()) {
       setError('请填写学习内容');
       return;
     }
 
+    setSubmitting(true);
     setError('');
     onConfirm(content.trim());
     setContent('');
   };
 
   const handleClose = () => {
+    //setSubmitting(false);
     setContent('');
     setError('');
     onClose();

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -17,9 +18,16 @@ const options = [
 ];
 
 export function MasteryDialog({ open, onClose, onConfirm, taskTitle, learningContent }: Props) {
+  const [submitting, setSubmitting] = useState(false);
+  useEffect(() => {
+    if (open) setSubmitting(false);
+  }, [open]);
+
   if (!open) return null;
 
   const handleConfirm = (value: 'good' | 'fair' | 'poor') => {
+    if (submitting) return;
+    setSubmitting(true);
     onConfirm(value);
   };
 
