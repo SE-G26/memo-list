@@ -1,6 +1,6 @@
 import type { UserProfile } from '@/shared/types/global';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 const AUTH_STORAGE_KEY = 'memo_auth_session';
 
 interface AuthPayload {
