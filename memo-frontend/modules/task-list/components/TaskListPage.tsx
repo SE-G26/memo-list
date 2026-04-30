@@ -147,7 +147,7 @@ export function TaskListPage({ initialDate }: TaskListPageProps) {
           坚持复习，知识长青 🌱
         </p>
         <Link
-          href="/calendar"
+          href={`/calendar?date=${selectedDate}`}
           className="mt-3 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-sm text-blue-700 transition-colors hover:bg-white"
         >
           <CalendarDays className="h-4 w-4" />
@@ -171,7 +171,7 @@ export function TaskListPage({ initialDate }: TaskListPageProps) {
       </div>
 
       {/* 底部添加按钮 */}
-      <Link href={`/task/new?date=${selectedDate}`}>
+      <Link href={`/task/new?date=${selectedDate}&from=list`}>
         <button className="mt-6 w-full rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700 flex items-center justify-center gap-2">
           <Plus className="h-5 w-5" />
           添加新任务

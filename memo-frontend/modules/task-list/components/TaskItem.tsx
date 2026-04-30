@@ -12,7 +12,7 @@ interface TaskItemProps {
 
 export function TaskItem({ task, onToggleComplete }: TaskItemProps) {
   return (
-    <Link href={`/task/${task.id}/edit`}>
+    <Link href={`/task/${task.id}/edit?from=list`}>
       <div className="flex items-center gap-3 rounded-lg border p-4 shadow-sm transition-shadow hover:shadow-md cursor-pointer">
         {/* 复选框 - 阻止链接跳转 */}
         <div

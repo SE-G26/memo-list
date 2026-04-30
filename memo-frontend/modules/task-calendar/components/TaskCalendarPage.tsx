@@ -5,6 +5,10 @@ import { ChevronLeft, ChevronRight, CalendarDays, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTasks } from '@/modules/task-list/hooks/useTasks';
 
+interface TaskCalendarPageProps {
+  initialDate?: string;
+}
+
 const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
 const formatDate = (date: Date) => {
@@ -24,11 +28,18 @@ const toMonthStart = (date: Date) => new Date(date.getFullYear(), date.getMonth(
 const addMonths = (date: Date, offset: number) => toMonthStart(new Date(date.getFullYear(), date.getMonth() + offset, 1));
 const toMonthKey = (date: Date) => `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}`;
 
-export function TaskCalendarPage() {
+export function TaskCalendarPage({ initialDate }: TaskCalendarPageProps) {
   const { allTasks } = useTasks();
   const [today] = useState(() => formatDate(new Date()));
   const [calendarState, setCalendarState] = useState(() => {
     const todayDate = new Date();
+    if (initialDate) {
+      const [year, month] = initialDate.split('-');
+      return {
+        currentMonth: new Date(Number(year), Number(month) - 1, 1),
+        selectedDate: initialDate,
+      };
+    }
     return {
       currentMonth: toMonthStart(todayDate),
       selectedDate: formatDate(todayDate),
@@ -138,7 +149,7 @@ export function TaskCalendarPage() {
             </Link>
           </div>
           <Link
-            href={`/task/new?date=${selectedDate}`}
+            href={`/task/new?date=${selectedDate}&from=calendar`}
             className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
@@ -257,7 +268,7 @@ export function TaskCalendarPage() {
           <div className="space-y-2">
             {selectedTasks.map((task) => (
               <Link
-                href={`/task/${task.id}/edit`}
+                href={`/task/${task.id}/edit?from=calendar`}
                 key={task.id}
                 className="flex items-center justify-between rounded-xl border border-gray-100 px-3 py-2.5 hover:bg-gray-50"
               >

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, BookOpen, Calendar, Clock, Repeat } from 'lucide-react';
 import { useTaskForm } from '../hooks/useTaskForm';
@@ -21,10 +21,15 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
   const router = useRouter();
   const { addTask, updateTask, deleteTask } = useTasks();
   const isEdit = !!task;
+  const from = useSearchParams().get('from');
 
   const isCompleted = task?.completed;
 
   const { formData, updateField, validate, getSubmitData } = useTaskForm(task, initialDate);
+
+  const backUrl = from === 'list'
+  ? `/?date=${formData.dueDate}`
+  : `/calendar?date=${formData.dueDate}`;
 
   // 弹窗状态
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -71,7 +76,12 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
         await addTask(submitData);
       }
 
-      router.replace(`/?date=${formData.dueDate}`);
+      
+      if (from === 'list') {
+        router.replace(`/?date=${formData.dueDate}`);
+      } else {
+        router.replace(`/calendar?date=${formData.dueDate}`);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : '保存失败，请稍后重试';
       alert(message);
@@ -89,7 +99,11 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
         return;
       }
     }
-    router.replace(`/?date=${formData.dueDate}`);
+    if (from === 'list') {
+      router.replace(`/?date=${formData.dueDate}`);
+    } else {
+      router.replace(`/calendar?date=${formData.dueDate}`);
+    }
   };
 
   return (
@@ -98,20 +112,11 @@ export function TaskFormPage({ task, initialDate }: TaskFormPageProps) {
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
         <div className="container mx-auto max-w-2xl px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href={`/?date=${formData.dueDate}`}
+            <Link href={backUrl}
              className="p-2 -ml-2 text-gray-600 hover:text-gray-900"
             >
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            {/*<h1 className="text-lg font-semibold text-gray-900">
-              {isEdit ? '编辑任务' : '新建任务'}
-            </h1>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 transition-colors"
-            >
-              保存
-            </button>*/}
           </div>
         </div>
       </div>
