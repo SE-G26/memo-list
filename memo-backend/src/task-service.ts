@@ -35,6 +35,16 @@ function compareDateOnly(a: string, b: string): number {
   return a < b ? -1 : 1;
 }
 
+// 调整日期到工作日（如果不是工作日）
+function adjustToWorkday(dateOnly: string): string {
+  let candidate = dateOnly;
+  while (true) {
+    const weekday = new Date(`${candidate}T00:00:00.000Z`).getUTCDay();
+    if (weekday !== 0 && weekday !== 6) return candidate; // 0=周日, 6=周六
+    candidate = addDays(candidate, 1);
+  }
+}
+
 function nextDueDate(currentDueDate: string, frequency: TaskFrequency): string {
   if (frequency === 'daily') return addDays(currentDueDate, 1);
   if (frequency === 'weekly') return addDays(currentDueDate, 7);
@@ -159,6 +169,12 @@ export async function createTask(userId: string, input: CreateTaskInput): Promis
   assertCreateInput(input);
 
   const now = nowIso();
+  // 调整工作日任务的起始日期
+  let dueDate = input.dueDate;
+  if (input.frequency === 'weekdays') {
+    dueDate = adjustToWorkday(dueDate);
+  }
+
   const newTask: Task = {
     id: newId(),
     userId,
@@ -168,7 +184,7 @@ export async function createTask(userId: string, input: CreateTaskInput): Promis
     isLearning: Boolean(input.isLearning),
     notes: input.notes?.trim() || undefined,
     completed: false,
-    dueDate: input.dueDate,
+    dueDate,
     createdAt: now,
     updatedAt: now,
     taskKind: input.isLearning ? 'learning_source' : 'standard',
@@ -177,6 +193,15 @@ export async function createTask(userId: string, input: CreateTaskInput): Promis
 
   const db = await readDb();
   db.tasks.push(newTask);
+
+  // 为重复任务生成下一个任务
+  if (input.frequency !== 'once') {
+    const successor = buildRecurringSuccessor(newTask);
+    if (successor) {
+      db.tasks.push(successor);
+    }
+  }
+
   await writeDb(db);
 
   return newTask;
@@ -202,9 +227,17 @@ export async function updateTask(userId: string, id: string, updates: UpdateTask
   }
 
   const existing = db.tasks[index];
+  
+  // 调整工作日任务的日期
+  let updatedDueDate = updates.dueDate;
+  if (updatedDueDate !== undefined && (updates.frequency === 'weekdays' || (updates.frequency === undefined && existing.frequency === 'weekdays'))) {
+    updatedDueDate = adjustToWorkday(updatedDueDate);
+  }
+
   const next: Task = {
     ...existing,
     ...updates,
+    dueDate: updatedDueDate !== undefined ? updatedDueDate : existing.dueDate,
     title: updates.title !== undefined ? updates.title.trim() : existing.title,
     notes: updates.notes !== undefined ? updates.notes.trim() || undefined : existing.notes,
     reminderTime: updates.reminderTime !== undefined ? updates.reminderTime : existing.reminderTime,

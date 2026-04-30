@@ -1,7 +1,8 @@
 import type { UserProfile } from '@/shared/types/global';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 const AUTH_STORAGE_KEY = 'memo_auth_session';
+const AUTH_REQUEST_TIMEOUT_MS = 8000;
 
 interface AuthPayload {
   token: string;
@@ -16,6 +17,26 @@ interface StoredSession {
 interface Credentials {
   username: string;
   password: string;
+}
+
+async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('请求超时，请检查网络或代理设置。');
+    }
+
+    throw new Error('网络连接失败，请确认后端服务已启动。');
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 function getStoredSession(): StoredSession | null {
@@ -71,14 +92,14 @@ export function setCurrentUserInStorage(user: UserProfile): void {
 
 async function authFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getAuthToken();
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init?.headers || {}),
-    },
-  });
+  const response = await fetchWithTimeout(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers || {}),
+      },
+    });
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
@@ -90,7 +111,7 @@ async function authFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function register(credentials: Credentials): Promise<UserProfile> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/api/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -110,7 +131,7 @@ export async function register(credentials: Credentials): Promise<UserProfile> {
 }
 
 export async function login(credentials: Credentials): Promise<UserProfile> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

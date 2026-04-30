@@ -1,7 +1,7 @@
 import type { MasteryLevel, Task } from '@/shared/types/global';
 import { clearAuthSession, getAuthToken } from '@/shared/lib/auth-api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
 type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed'>;
 type UpdateTaskInput = Partial<Omit<Task, 'id' | 'createdAt'>>;
