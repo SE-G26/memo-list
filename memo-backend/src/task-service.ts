@@ -193,15 +193,6 @@ export async function createTask(userId: string, input: CreateTaskInput): Promis
 
   const db = await readDb();
   db.tasks.push(newTask);
-
-  // 为重复任务生成下一个任务
-  if (input.frequency !== 'once') {
-    const successor = buildRecurringSuccessor(newTask);
-    if (successor) {
-      db.tasks.push(successor);
-    }
-  }
-
   await writeDb(db);
 
   return newTask;
